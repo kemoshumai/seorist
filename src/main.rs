@@ -107,7 +107,7 @@ fn App() -> impl IntoView {
 
 #[component]
 fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::MouseEvent) + 'static ) -> impl IntoView {
-    let class = format!("block shadow-md rounded-lg h-24 aspect-[3/4] flex items-center justify-center {}", if checked {"bg-black text-white"} else {"bg-white text-black"});
+    let class = format!("block shadow-md rounded-lg h-24 aspect-[3/4] flex items-center justify-center {}", if checked {"bg-slate-300 text-black"} else {"bg-white text-black"});
     view! {
         <div class={class} on:click=handler_on_click>
             <p class="text-2xl h-min w-min">{label}</p>
