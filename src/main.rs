@@ -82,8 +82,16 @@ fn App() -> impl IntoView {
                                         let label = format!("{}{}", note_name, (key_note_number+i) as i8/12-1);
                                         let checked = scale_pattern.contains(&(i%12));
                                         view! {
-                                            <div>
+                                            <div class="flex flex-col ">
                                                 <Card label={label} checked=checked handler_on_click={|_|{}} />
+                                                {
+                                                    checked.then(||{
+                                                        view!{
+                                                            <p class="text-6xl text-center py-5">{"|"}</p>
+                                                            <Card label=(scale_pattern.iter().position(|r|*r==i).unwrap()+1).to_string() checked={false} handler_on_click={|_|{}} />
+                                                        }
+                                                    })
+                                                }
                                             </div>
                                         }
                                     }
