@@ -1,5 +1,5 @@
 use leptos::*;
-use web_sys::HtmlDivElement;
+use web_sys::{window, HtmlDivElement};
 fn main() {
     mount_to_body(|| view! { <App /> } );
 }
@@ -46,7 +46,7 @@ fn App() -> impl IntoView {
                     />
                 </div>
             </header>
-            <main class="flex flex-col items-center">
+            <main class="flex flex-col items-center my-5">
                 {
                     move || key_note_number.get().is_some().then(|| {
                         let key_note_number = key_note_number.get().unwrap();
@@ -101,6 +101,51 @@ fn App() -> impl IntoView {
                     })
                 }
             </main>
+            <section class="flex flex-col items-center my-5">
+                {
+                    move || key_note_number.get().is_some().then(|| {
+                        let key_note_number = key_note_number.get().unwrap();
+
+                        view!{
+                            <h2>{"Chords"}</h2>
+                            <div class="flex">
+                                <div class="flex flex-col">
+                                    <For
+                                        each=||{0..7}
+                                        key=|&i|{i}
+                                        children=move|i|{
+                                            view!{
+                                                <div class="h-24 aspect-square flex items-center">
+                                                    <p class="text-center w-full text-6xl font-thin">{get_roman_number_musical(i+1)}</p>
+                                                </div>
+                                            }
+                                        }
+                                    />
+                                </div>
+                                <div class="flex flex-col">
+                                    <For
+                                        each=||{0..7}
+                                        key=|&i|{i}
+                                        children=move|i|{
+
+                                            let label = format!("{}-{}-{}", (i+1), ((i+2)%7+1),((i+4)%7+1));
+
+                                            let label_for_alert = label.clone();
+                                            let handler = move |_| window().unwrap().alert_with_message(&label_for_alert).unwrap();
+
+                                            view!{
+                                                <div class="h-24 w-72 flex items-center p-2">
+                                                    <button on:click=handler class="block w-full h-full text-6xl text-center bg-white rounded-lg font-thin">{label}</button>
+                                                </div>
+                                            }
+                                        }
+                                    />
+                                </div>
+                            </div>
+                        }
+                    })
+                }
+            </section>
         </div>
     }
 }
@@ -130,5 +175,18 @@ fn get_note_name(key_number: u8) -> &'static str{
         10 => "A#",
         11 => "B",
         _ => panic!("Invalid key number"),
+    }
+}
+
+fn get_roman_number_musical(number: u8) -> &'static str{
+    match number {
+        1 => "I",
+        2 => "II",
+        3 => "III",
+        4 => "IV",
+        5 => "V",
+        6 => "VI",
+        7 => "VII",
+        _ => panic!("Invalid number"),
     }
 }
