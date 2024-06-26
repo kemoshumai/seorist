@@ -32,16 +32,17 @@ fn App() -> impl IntoView {
         <div class="m-5">
             <header>
                 <p class="text-8xl">{"Seorist"}</p>
-                <div class="flex gap-2 overflow-x-scroll cursor-pointer py-3" on:wheel=horizontal_scroll_handler>               <For 
-                        each = move || {0..=127-12}
+                <div class="flex gap-2 overflow-x-scroll cursor-pointer py-3" on:wheel=horizontal_scroll_handler>               
+                    <For 
+                        each = move || {(0..=127-12).map(move|i|(i, key_note_number.get().is_some_and(|t|t==i) ))}
                         key = |&i|{i}
-                        children = { move |i| {
+                        children = move |(i, checked)| {
                             let note_name = get_note_name(i);
                             let label = format!("{}{}", note_name, i as i8/12-1);
                             view! {
-                                <Card label={label} handler_on_click={move|_|{set_key_note_number.update(|j|*j=Some(i))}} />
+                                <Card label={label} checked=checked handler_on_click={move|_|{set_key_note_number.set(Some(i))}} />
                             }
-                        }}
+                        }
                     />
                 </div>
             </header>
@@ -59,6 +60,11 @@ fn App() -> impl IntoView {
                             "px-2 cursor-pointer {}",
                             if scale.get() == Scale::Minor {"font-medium"} else { "" }
                         );
+
+                        let scale_pattern = match scale.get() {
+                            Scale::Major => vec![0, 2, 4, 5, 7, 9, 11],
+                            Scale::Minor => vec![0, 2, 3, 5, 7, 8, 10],
+                        };
                         
                         view! {
                             <h2>{"Choose the scale."}</h2>
@@ -74,8 +80,11 @@ fn App() -> impl IntoView {
                                     children=move|i|{
                                         let note_name = get_note_name(key_note_number+i);
                                         let label = format!("{}{}", note_name, (key_note_number+i) as i8/12-1);
+                                        let checked = scale_pattern.contains(&(i%12));
                                         view! {
-                                            <Card label={label} handler_on_click={|_|{}} />
+                                            <div>
+                                                <Card label={label} checked=checked handler_on_click={|_|{}} />
+                                            </div>
                                         }
                                     }
                                 />
@@ -89,9 +98,10 @@ fn App() -> impl IntoView {
 }
 
 #[component]
-fn Card(label: String, handler_on_click: impl Fn(leptos::ev::MouseEvent) + 'static ) -> impl IntoView {
+fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::MouseEvent) + 'static ) -> impl IntoView {
+    let class = format!("block shadow-md rounded-lg h-24 aspect-[3/4] flex items-center justify-center {}", if checked {"bg-black text-white"} else {"bg-white text-black"});
     view! {
-        <div class="block bg-white shadow-md rounded-lg h-24 aspect-[3/4] flex items-center justify-center" on:click=handler_on_click>
+        <div class={class} on:click=handler_on_click>
             <p class="text-2xl h-min w-min">{label}</p>
         </div>
     }
