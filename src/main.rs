@@ -125,8 +125,8 @@ fn App() -> impl IntoView {
                                 </div>
                                 <ChordCardList differences=&[0, 2, 4] label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() /> // Major / Minor
                                 <ChordCardList differences=&[0, 2, 4, 6]  label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) /> // 7th
-                                <ChordCardList differences=&[0, 2, 4, 9]  label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) /> // add9
-                                <ChordCardList differences=&[0, 2, 4, 6, 9]  label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) /> // 9th
+                                <ChordCardList differences=&[0, 2, 4, 8]  label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) /> // add9
+                                <ChordCardList differences=&[0, 2, 4, 6, 8]  label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) /> // 9th
                                 <ChordCardList differences=&[0, 3, 4]  label_fn=|d|format!("{} sus4", get_roman_number_musical(*d.first().unwrap()))/> // sus4
                                 <ChordCardList differences=&[0, 2, 4, 5]  label_fn=|d|format!("{} 6", get_roman_number_musical(*d.first().unwrap()))/> // 6th
                             </div>
