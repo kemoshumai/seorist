@@ -122,25 +122,12 @@ fn App() -> impl IntoView {
                                         }
                                     />
                                 </div>
-                                <div class="flex flex-col">
-                                    <For
-                                        each=||{0..7}
-                                        key=|&i|{i}
-                                        children=move|i|{
-
-                                            let label = format!("{}-{}-{}", (i+1), ((i+2)%7+1),((i+4)%7+1));
-
-                                            let label_for_alert = label.clone();
-                                            let handler = move |_| window().unwrap().alert_with_message(&label_for_alert).unwrap();
-
-                                            view!{
-                                                <div class="h-24 w-72 flex items-center p-2">
-                                                    <button on:click=handler class="block w-full h-full text-6xl text-center bg-white rounded-lg font-thin">{label}</button>
-                                                </div>
-                                            }
-                                        }
-                                    />
-                                </div>
+                                <ChordCardList differences=&[0, 2, 4] /> // Major / Minor
+                                <ChordCardList differences=&[0, 2, 4, 6] /> // 7th
+                                <ChordCardList differences=&[0, 2, 4, 9] /> // add9
+                                <ChordCardList differences=&[0, 2, 4, 6, 9] /> // 9th
+                                <ChordCardList differences=&[0, 3, 4] /> // sus4
+                                <ChordCardList differences=&[0, 2, 4, 5] /> // 6th
                             </div>
                         }
                     })
@@ -156,6 +143,34 @@ fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::Mous
     view! {
         <div class={class} on:click=handler_on_click>
             <p class="text-2xl h-min w-min">{label}</p>
+        </div>
+    }
+}
+
+#[component]
+fn ChordCard(label: String, handler_on_click: impl Fn(leptos::ev::MouseEvent) + 'static ) -> impl IntoView {
+    view! {
+        <div class="h-24 w-72 flex items-center p-2">
+            <button on:click=handler_on_click class="block w-full h-full text-6xl text-center bg-white rounded-lg font-thin">{label}</button>
+        </div>
+    }
+}
+
+#[component]
+fn ChordCardList(differences: &'static [u8]) -> impl IntoView {
+    view! {
+        <div class="flex flex-col">
+            <For
+                each=||{0..7}
+                key=|&i|{i}
+                children=move|i|{
+                    let numbers = differences.iter().map(|d| (i + d) % 7 + 1).collect::<Vec<_>>();
+                    let label = numbers.iter().map(|x|x.to_string()).collect::<Vec<_>>().join("-");
+                    view!{
+                        <ChordCard label={label} handler_on_click={|_|{}} />
+                    }
+                }
+            />
         </div>
     }
 }
