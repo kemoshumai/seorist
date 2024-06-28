@@ -1,6 +1,7 @@
 use leptos::*;
 use web_sys::{window, HtmlDivElement};
 fn main() {
+    console_error_panic_hook::set_once();
     mount_to_body(|| view! { <App /> } );
 }
 
@@ -122,12 +123,12 @@ fn App() -> impl IntoView {
                                         }
                                     />
                                 </div>
-                                <ChordCardList differences=&[0, 2, 4] /> // Major / Minor
-                                <ChordCardList differences=&[0, 2, 4, 6] /> // 7th
-                                <ChordCardList differences=&[0, 2, 4, 9] /> // add9
-                                <ChordCardList differences=&[0, 2, 4, 6, 9] /> // 9th
-                                <ChordCardList differences=&[0, 3, 4] /> // sus4
-                                <ChordCardList differences=&[0, 2, 4, 5] /> // 6th
+                                <ChordCardList differences=&[0, 2, 4] label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() /> // Major / Minor
+                                <ChordCardList differences=&[0, 2, 4, 6]  label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) /> // 7th
+                                <ChordCardList differences=&[0, 2, 4, 9]  label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) /> // add9
+                                <ChordCardList differences=&[0, 2, 4, 6, 9]  label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) /> // 9th
+                                <ChordCardList differences=&[0, 3, 4]  label_fn=|d|format!("{} sus4", get_roman_number_musical(*d.first().unwrap()))/> // sus4
+                                <ChordCardList differences=&[0, 2, 4, 5]  label_fn=|d|format!("{} 6", get_roman_number_musical(*d.first().unwrap()))/> // 6th
                             </div>
                         }
                     })
@@ -148,7 +149,7 @@ fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::Mous
 }
 
 #[component]
-fn ChordCard(label: String, handler_on_click: impl Fn(leptos::ev::MouseEvent) + 'static ) -> impl IntoView {
+fn ChordCard(label: String, caption: String, handler_on_click: impl Fn(leptos::ev::MouseEvent) + 'static ) -> impl IntoView {
     view! {
         <div class="h-24 w-72 flex items-center p-2">
             <button on:click=handler_on_click class="block w-full h-full text-6xl text-center bg-white rounded-lg font-thin">{label}</button>
@@ -157,7 +158,7 @@ fn ChordCard(label: String, handler_on_click: impl Fn(leptos::ev::MouseEvent) + 
 }
 
 #[component]
-fn ChordCardList(differences: &'static [u8]) -> impl IntoView {
+fn ChordCardList<T>(differences: &'static [u8], label_fn: T) -> impl IntoView  where T: Fn(Vec<u8>) -> String + 'static{
     view! {
         <div class="flex flex-col">
             <For
@@ -165,9 +166,10 @@ fn ChordCardList(differences: &'static [u8]) -> impl IntoView {
                 key=|&i|{i}
                 children=move|i|{
                     let numbers = differences.iter().map(|d| (i + d) % 7 + 1).collect::<Vec<_>>();
-                    let label = numbers.iter().map(|x|x.to_string()).collect::<Vec<_>>().join("-");
+                    let caption = numbers.iter().map(|x|x.to_string()).collect::<Vec<_>>().join("-");
+                    let label = label_fn(numbers);
                     view!{
-                        <ChordCard label={label} handler_on_click={|_|{}} />
+                        <ChordCard label={label} caption={caption} handler_on_click={|_|{}} />
                     }
                 }
             />
