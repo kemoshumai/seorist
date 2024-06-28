@@ -151,8 +151,11 @@ fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::Mous
 #[component]
 fn ChordCard(label: String, caption: String, handler_on_click: impl Fn(leptos::ev::MouseEvent) + 'static ) -> impl IntoView {
     view! {
-        <div class="h-24 w-72 flex items-center p-2">
-            <button on:click=handler_on_click class="block w-full h-full text-6xl text-center bg-white rounded-lg font-thin">{label}</button>
+        <div class="h-24 w-48 flex items-center p-2">
+            <button on:click=handler_on_click class="block w-full h-full text-center bg-white rounded-lg font-thin">
+                <span class="text-4xl">{label}</span><br />
+                <span class="text-2xl">{caption}</span>
+            </button>
         </div>
     }
 }
