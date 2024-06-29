@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.86"
 console_error_panic_hook = "0.1.7"
 leptos = { version = "0.6.12", features = ["csr"] }
 leptos-use = "0.10.10"
+web-sys = { version = "0.3.69", features = ["AudioContext","OscillatorNode","AudioDestinationNode","AudioParam"] }

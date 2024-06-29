@@ -1,3 +1,6 @@
+
+mod synth;
+
 use leptos::*;
 use web_sys::{window, HtmlDivElement};
 fn main() {
@@ -16,6 +19,7 @@ fn App() -> impl IntoView {
 
     let (key_note_number, set_key_note_number) = create_signal(Some(60));
     let (scale, set_scale) = create_signal(Scale::Major);
+    let (main_synth, set_main_synth) = create_signal(synth::Synth::new());
 
     let horizontal_scroll_handler = |event: leptos::ev::WheelEvent| {
 
@@ -172,7 +176,10 @@ fn ChordCardList<T>(differences: &'static [u8], label_fn: T) -> impl IntoView  w
                     let caption = numbers.iter().map(|x|x.to_string()).collect::<Vec<_>>().join("-");
                     let label = label_fn(numbers);
                     view!{
-                        <ChordCard label={label} caption={caption} handler_on_click={|_|{}} />
+                        <ChordCard label={label} caption={caption} handler_on_click={|_|{
+                            let synth = synth::Synth::new();
+                            synth.play(440.);
+                        }} />
                     }
                 }
             />
