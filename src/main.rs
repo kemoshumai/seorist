@@ -19,7 +19,7 @@ fn App() -> impl IntoView {
 
     let (key_note_number, set_key_note_number) = create_signal(Some(60));
     let (scale, set_scale) = create_signal(Scale::Major);
-    let (main_synth, set_main_synth) = create_signal(synth::Synth::new());
+    let main_synth = store_value(synth::Synth::new());
 
     let horizontal_scroll_handler = |event: leptos::ev::WheelEvent| {
 
@@ -108,6 +108,9 @@ fn App() -> impl IntoView {
             </main>
             <section class="flex flex-col items-center my-5">
                 {
+
+                    let synthesizer = main_synth;
+
                     move || key_note_number.get().is_some().then(|| {
                         let key_note_number = key_note_number.get().unwrap();
 
@@ -127,12 +130,12 @@ fn App() -> impl IntoView {
                                         }
                                     />
                                 </div>
-                                <ChordCardList differences=&[0, 2, 4] label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() /> // Major / Minor
-                                <ChordCardList differences=&[0, 2, 4, 6]  label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) /> // 7th
-                                <ChordCardList differences=&[0, 2, 4, 8]  label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) /> // add9
-                                <ChordCardList differences=&[0, 2, 4, 6, 8]  label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) /> // 9th
-                                <ChordCardList differences=&[0, 3, 4]  label_fn=|d|format!("{} sus4", get_roman_number_musical(*d.first().unwrap()))/> // sus4
-                                <ChordCardList differences=&[0, 2, 4, 5]  label_fn=|d|format!("{} 6", get_roman_number_musical(*d.first().unwrap()))/> // 6th
+                                <ChordCardList differences=&[0, 2, 4] label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() synthesizer={synthesizer} /> // Major / Minor
+                                <ChordCardList differences=&[0, 2, 4, 6]  label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // 7th
+                                <ChordCardList differences=&[0, 2, 4, 8]  label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // add9
+                                <ChordCardList differences=&[0, 2, 4, 6, 8]  label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // 9th
+                                <ChordCardList differences=&[0, 3, 4]  label_fn=|d|format!("{} sus4", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // sus4
+                                <ChordCardList differences=&[0, 2, 4, 5]  label_fn=|d|format!("{} 6", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // 6th
                             </div>
                         }
                     })
@@ -153,7 +156,14 @@ fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::Mous
 }
 
 #[component]
-fn ChordCard(label: String, caption: String, handler_on_click: impl Fn(leptos::ev::MouseEvent) + 'static ) -> impl IntoView {
+fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Synth> ) -> impl IntoView {
+    let label_clone = label.clone();
+    let handler_on_click = move |_|{
+        let freq = 440.0 * 2.0_f32.powf((label_clone.chars().next().unwrap() as i32 - 60) as f32 / 12.0);
+        synthesizer.with_value(|synthesizer|{
+            synthesizer.play(freq);
+        });
+    };
     view! {
         <div class="h-24 w-48 flex items-center p-2">
             <button on:click=handler_on_click class="block w-full h-full text-center bg-white rounded-lg font-thin">
@@ -165,7 +175,7 @@ fn ChordCard(label: String, caption: String, handler_on_click: impl Fn(leptos::e
 }
 
 #[component]
-fn ChordCardList<T>(differences: &'static [u8], label_fn: T) -> impl IntoView  where T: Fn(Vec<u8>) -> String + 'static{
+fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: StoredValue<synth::Synth>) -> impl IntoView  where T: Fn(Vec<u8>) -> String + 'static{
     view! {
         <div class="flex flex-col">
             <For
@@ -176,10 +186,7 @@ fn ChordCardList<T>(differences: &'static [u8], label_fn: T) -> impl IntoView  w
                     let caption = numbers.iter().map(|x|x.to_string()).collect::<Vec<_>>().join("-");
                     let label = label_fn(numbers);
                     view!{
-                        <ChordCard label={label} caption={caption} handler_on_click={|_|{
-                            let synth = synth::Synth::new();
-                            synth.play(440.);
-                        }} />
+                        <ChordCard label={label} caption={caption} synthesizer=synthesizer />
                     }
                 }
             />
