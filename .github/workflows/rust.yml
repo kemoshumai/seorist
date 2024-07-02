@@ -16,8 +16,10 @@ jobs:
 
     steps:
     - uses: jetli/trunk-action@v0.5.0
+    - name: Rustup Wasm
+      run: rustup target add wasm32-unknown-unknown
     - name: Build
-      run: cd ../; trunk build --release
+      run: ls; trunk build --release
     - uses: actions/upload-artifact@v3
       with:
         name: seorist
