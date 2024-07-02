@@ -17,7 +17,7 @@ enum Scale {
 #[component]
 fn App() -> impl IntoView {
 
-    let (key_note_number, set_key_note_number) = create_signal(Some(60));
+    let (key_note_number, set_key_note_number) = create_signal(None);
     let (scale, set_scale) = create_signal(Scale::Major);
     let main_synth = store_value(synth::Synth::new());
 
@@ -34,78 +34,82 @@ fn App() -> impl IntoView {
     };
 
     view! {
-        <div class="m-5">
-            <header>
-                <p class="text-8xl">{"Seorist"}</p>
-                <div class="flex gap-2 overflow-x-scroll cursor-pointer py-3" on:wheel=horizontal_scroll_handler>               
-                    <For 
-                        each = move || {(0..=127-12).map(move|i|(i, key_note_number.get().is_some_and(|t|t==i) ))}
-                        key = |&i|{i}
-                        children = move |(i, checked)| {
-                            let note_name = get_note_name(i);
-                            let label = format!("{}{}", note_name, i as i8/12-1);
-                            view! {
-                                <Card label={label} checked=checked handler_on_click={move|_|{set_key_note_number.set(Some(i))}} />
+        <div class="overflow-none w-screen max-w-screen">
+            <header class="overflow-none">
+                <p class="text-8xl p-5">{"Seorist"}</p>
+                <div class="overflow-x-scroll  py-3">
+                    <div class="flex gap-2 cursor-pointer" on:wheel=horizontal_scroll_handler>               
+                        <For 
+                            each = move || {(0..=127-12).map(move|i|(i, key_note_number.get().is_some_and(|t|t==i) ))}
+                            key = |&i|{i}
+                            children = move |(i, checked)| {
+                                let note_name = get_note_name(i);
+                                let label = format!("{}{}", note_name, i as i8/12-1);
+                                view! {
+                                    <Card label={label} checked=checked handler_on_click={move|_|{set_key_note_number.set(Some(i))}} />
+                                }
                             }
-                        }
-                    />
+                        />
+                    </div>
                 </div>
             </header>
-            <main class="flex flex-col items-center my-5">
-                {
-                    move || key_note_number.get().is_some().then(|| {
-                        let key_note_number = key_note_number.get().unwrap();
+            <div class="w-screen overflow-x-scroll">
+                <main class="flex flex-col items-center my-5">
+                    {
+                        move || key_note_number.get().is_some().then(|| {
+                            let key_note_number = key_note_number.get().unwrap();
 
-                        let major_span_class = format!(
-                            "px-2 cursor-pointer {}",
-                            if scale.get() == Scale::Major {"font-medium"} else { "" }
-                        );
+                            let major_span_class = format!(
+                                "px-2 cursor-pointer {}",
+                                if scale.get() == Scale::Major {"font-medium"} else { "" }
+                            );
 
-                        let minor_span_class = format!(
-                            "px-2 cursor-pointer {}",
-                            if scale.get() == Scale::Minor {"font-medium"} else { "" }
-                        );
+                            let minor_span_class = format!(
+                                "px-2 cursor-pointer {}",
+                                if scale.get() == Scale::Minor {"font-medium"} else { "" }
+                            );
 
-                        let scale_pattern = match scale.get() {
-                            Scale::Major => vec![0, 2, 4, 5, 7, 9, 11],
-                            Scale::Minor => vec![0, 2, 3, 5, 7, 8, 10],
-                        };
-                        
-                        view! {
-                            <h2>{"Choose the scale."}</h2>
-                            <p class="my-4">
-                                <span class={major_span_class} on:click=move|_|set_scale.set(Scale::Major) >major</span>
-                                <span>{"/"}</span>
-                                <span class={minor_span_class} on:click=move|_|set_scale.set(Scale::Minor) >minor</span>
-                            </p>
-                            <div class="flex gap-2">
-                                <For 
-                                    each=||{0..12}
-                                    key=|&i|{i}
-                                    children=move|i|{
-                                        let note_name = get_note_name(key_note_number+i);
-                                        let label = format!("{}{}", note_name, (key_note_number+i) as i8/12-1);
-                                        let checked = scale_pattern.contains(&(i%12));
-                                        view! {
-                                            <div class="flex flex-col ">
-                                                <Card label={label} checked=checked handler_on_click={|_|{}} />
-                                                {
-                                                    checked.then(||{
-                                                        view!{
-                                                            <p class="text-6xl text-center py-5">{"|"}</p>
-                                                            <Card label=(scale_pattern.iter().position(|r|*r==i).unwrap()+1).to_string() checked={false} handler_on_click={|_|{}} />
-                                                        }
-                                                    })
-                                                }
-                                            </div>
+                            let scale_pattern = match scale.get() {
+                                Scale::Major => vec![0, 2, 4, 5, 7, 9, 11],
+                                Scale::Minor => vec![0, 2, 3, 5, 7, 8, 10],
+                            };
+                            
+                            view! {
+                                <h2>{"Choose the scale."}</h2>
+                                <p class="my-4">
+                                    <span class={major_span_class} on:click=move|_|set_scale.set(Scale::Major) >major</span>
+                                    <span>{"/"}</span>
+                                    <span class={minor_span_class} on:click=move|_|set_scale.set(Scale::Minor) >minor</span>
+                                </p>
+                                <div class="flex gap-2">
+                                    <For 
+                                        each=||{0..12}
+                                        key=|&i|{i}
+                                        children=move|i|{
+                                            let note_name = get_note_name(key_note_number+i);
+                                            let label = format!("{}{}", note_name, (key_note_number+i) as i8/12-1);
+                                            let checked = scale_pattern.contains(&(i%12));
+                                            view! {
+                                                <div class="flex flex-col ">
+                                                    <Card label={label} checked=checked handler_on_click={|_|{}} />
+                                                    {
+                                                        checked.then(||{
+                                                            view!{
+                                                                <p class="text-6xl text-center py-5">{"|"}</p>
+                                                                <Card label=(scale_pattern.iter().position(|r|*r==i).unwrap()+1).to_string() checked={false} handler_on_click={|_|{}} />
+                                                            }
+                                                        })
+                                                    }
+                                                </div>
+                                            }
                                         }
-                                    }
-                                />
-                            </div>
-                        }
-                    })
-                }
-            </main>
+                                    />
+                                </div>
+                            }
+                        })
+                    }
+                </main>
+            </div>
             <section class="flex flex-col items-center my-5">
                 {
 
