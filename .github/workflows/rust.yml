@@ -1,0 +1,41 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install Trunk
+      run: cargo install trunk
+    - name: Build
+      run: trunk build --release
+    - uses: actions/upload-artifact@v3
+      with:
+        name: seorist
+        path: dist
+    - uses: actions/upload-pages-artifact@v1
+      with:
+        path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest 
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/deploy-pages@v1
+        id: deployment
