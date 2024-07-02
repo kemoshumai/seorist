@@ -22,7 +22,7 @@ jobs:
     - name: Rustup Wasm32 Target
       run: rustup target add wasm32-unknown-unknown
     - name: Build
-      run: trunk build --release
+      run: trunk build --release --public-url /seorist
     - uses: actions/upload-artifact@v3
       with:
         name: seorist
