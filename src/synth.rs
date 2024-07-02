@@ -28,7 +28,8 @@ impl Synth{
             osc.set_type(web_sys::OscillatorType::Square);
             osc.connect_with_audio_node(self.output_gain.as_ref()).unwrap();
 
-            osc.frequency().set_value(*freq);
+            osc.frequency().set_target_at_time(*freq, self.ctx.current_time(), 0.01).unwrap();
+            osc.frequency().set_target_at_time(0., self.ctx.current_time()+1.0, 0.01).unwrap();
             osc.start().unwrap();
 
         }
