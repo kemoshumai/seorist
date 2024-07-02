@@ -199,7 +199,7 @@ fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::Mous
 }
 
 #[component]
-fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Synth>, note_numbers_in_scale: Vec<u8> ) -> impl IntoView {
+fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Synth>, note_numbers: Vec<u8> ) -> impl IntoView {
     let handler_on_click = move |_|{
         synthesizer.with_value(|synthesizer|{
             synthesizer.play(&[261.,329.,392.]);
@@ -225,9 +225,10 @@ fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: Stored
                 children=move|i|{
                     let numbers = differences.iter().map(|d| (i + d) % 7 + 1).collect::<Vec<_>>();
                     let caption = numbers.iter().map(|x|x.to_string()).collect::<Vec<_>>().join("-");
-                    let label = label_fn(numbers);
+                    let label = label_fn(numbers.clone());
+                    let note_numbers = numbers.iter().map(|n|*note_numbers_in_scale.get(*n as usize - 1).unwrap()).collect::<Vec<_>>();
                     view!{
-                        <ChordCard label={label} caption={caption} synthesizer=synthesizer note_numbers_in_scale=note_numbers_in_scale />
+                        <ChordCard label={label} caption={caption} synthesizer=synthesizer note_numbers=note_numbers />
                     }
                 }
             />
