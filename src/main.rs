@@ -111,33 +111,77 @@ fn App() -> impl IntoView {
 
                     let synthesizer = main_synth;
 
-                    move || key_note_number.get().is_some().then(|| {
-
-                        view!{
-                            <h2>{"Chords"}</h2>
-                            <div class="flex">
-                                <div class="flex flex-col">
-                                    <For
-                                        each=||{0..7}
-                                        key=|&i|{i}
-                                        children=move|i|{
-                                            view!{
-                                                <div class="h-24 aspect-square flex items-center">
-                                                    <p class="text-center w-full text-6xl font-thin">{get_roman_number_musical(i+1)}</p>
-                                                </div>
+                    move || match key_note_number.get() {
+                        Some(key_note_number) => {
+                            let scale_pattern = match scale.get() {
+                                Scale::Major => vec![0, 2, 4, 5, 7, 9, 11],
+                                Scale::Minor => vec![0, 2, 3, 5, 7, 8, 10],
+                            };
+                            let note_numbers_in_scale = scale_pattern.iter().map(|r|(key_note_number+r)).collect::<Vec<u8>>();
+    
+                            view!{
+                                <h2>{"Chords"}</h2>
+                                <div class="flex">
+                                    <div class="flex flex-col">
+                                        <For
+                                            each=||{0..7}
+                                            key=|&i|{i}
+                                            children=move|i|{
+                                                view!{
+                                                    <div class="h-24 aspect-square flex items-center">
+                                                        <p class="text-center w-full text-6xl font-thin">{get_roman_number_musical(i+1)}</p>
+                                                    </div>
+                                                }
                                             }
-                                        }
-                                    />
+                                        />
+                                    </div>
+                                    <ChordCardList 
+                                        differences=&[0, 2, 4] 
+                                        label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() 
+                                        synthesizer={synthesizer} 
+                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                    /> // Major / Minor
+                                    <ChordCardList 
+                                        differences=&[0, 2, 4, 6]  
+                                        label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) 
+                                        synthesizer={synthesizer} 
+                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                    /> // 7th
+                                    <ChordCardList 
+                                        differences=&[0, 2, 4, 8]  
+                                        label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) 
+                                        synthesizer={synthesizer} 
+                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                    /> // add9
+                                    <ChordCardList 
+                                        differences=&[0, 2, 4, 6, 8]  
+                                        label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) 
+                                        synthesizer={synthesizer} 
+                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                    /> // 9th
+                                    <ChordCardList 
+                                        differences=&[0, 3, 4]  
+                                        label_fn=|d|format!("{} sus4", get_roman_number_musical(*d.first().unwrap())) 
+                                        synthesizer={synthesizer} 
+                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                    /> // sus4
+                                    <ChordCardList 
+                                        differences=&[0, 2, 4, 5]  
+                                        label_fn=|d|format!("{} 6", get_roman_number_musical(*d.first().unwrap())) 
+                                        synthesizer={synthesizer} 
+                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                    /> // 6th
                                 </div>
-                                <ChordCardList differences=&[0, 2, 4] label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() synthesizer={synthesizer} /> // Major / Minor
-                                <ChordCardList differences=&[0, 2, 4, 6]  label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // 7th
-                                <ChordCardList differences=&[0, 2, 4, 8]  label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // add9
-                                <ChordCardList differences=&[0, 2, 4, 6, 8]  label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // 9th
-                                <ChordCardList differences=&[0, 3, 4]  label_fn=|d|format!("{} sus4", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // sus4
-                                <ChordCardList differences=&[0, 2, 4, 5]  label_fn=|d|format!("{} 6", get_roman_number_musical(*d.first().unwrap())) synthesizer={synthesizer} /> // 6th
-                            </div>
+                            }.into_view()
+                        },
+                        None => {
+                            view!{
+                                <div>
+                                    <p>{"Please select a key note."}</p>
+                                </div>
+                            }.into_view()
                         }
-                    })
+                    }
                 }
             </section>
         </div>
@@ -155,7 +199,7 @@ fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::Mous
 }
 
 #[component]
-fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Synth> ) -> impl IntoView {
+fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Synth>, note_numbers_in_scale: Vec<u8> ) -> impl IntoView {
     let handler_on_click = move |_|{
         synthesizer.with_value(|synthesizer|{
             synthesizer.play(&[261.,329.,392.]);
@@ -172,7 +216,7 @@ fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Syn
 }
 
 #[component]
-fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: StoredValue<synth::Synth>) -> impl IntoView  where T: Fn(Vec<u8>) -> String + 'static{
+fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: StoredValue<synth::Synth>, note_numbers_in_scale: Vec<u8>) -> impl IntoView  where T: Fn(Vec<u8>) -> String + 'static{
     view! {
         <div class="flex flex-col">
             <For
@@ -183,7 +227,7 @@ fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: Stored
                     let caption = numbers.iter().map(|x|x.to_string()).collect::<Vec<_>>().join("-");
                     let label = label_fn(numbers);
                     view!{
-                        <ChordCard label={label} caption={caption} synthesizer=synthesizer />
+                        <ChordCard label={label} caption={caption} synthesizer=synthesizer note_numbers_in_scale=note_numbers_in_scale />
                     }
                 }
             />
