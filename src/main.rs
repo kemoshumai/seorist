@@ -53,7 +53,7 @@ fn App() -> impl IntoView {
                     </div>
                 </div>
             </header>
-            <div class="w-screen overflow-x-scroll">
+            <div class="w-screen">
                 <main class="flex flex-col items-center my-5">
                     {
                         move || key_note_number.get().is_some().then(|| {
@@ -81,29 +81,31 @@ fn App() -> impl IntoView {
                                     <span>{"/"}</span>
                                     <span class={minor_span_class} on:click=move|_|set_scale.set(Scale::Minor) >minor</span>
                                 </p>
-                                <div class="flex gap-2">
-                                    <For 
-                                        each=||{0..12}
-                                        key=|&i|{i}
-                                        children=move|i|{
-                                            let note_name = get_note_name(key_note_number+i);
-                                            let label = format!("{}{}", note_name, (key_note_number+i) as i8/12-1);
-                                            let checked = scale_pattern.contains(&(i%12));
-                                            view! {
-                                                <div class="flex flex-col ">
-                                                    <Card label={label} checked=checked handler_on_click={|_|{}} />
-                                                    {
-                                                        checked.then(||{
-                                                            view!{
-                                                                <p class="text-6xl text-center py-5">{"|"}</p>
-                                                                <Card label=(scale_pattern.iter().position(|r|*r==i).unwrap()+1).to_string() checked={false} handler_on_click={|_|{}} />
-                                                            }
-                                                        })
-                                                    }
-                                                </div>
+                                <div class="overflow-x-scroll w-screen">
+                                    <div class="flex gap-2">
+                                        <For 
+                                            each=||{0..12}
+                                            key=|&i|{i}
+                                            children=move|i|{
+                                                let note_name = get_note_name(key_note_number+i);
+                                                let label = format!("{}{}", note_name, (key_note_number+i) as i8/12-1);
+                                                let checked = scale_pattern.contains(&(i%12));
+                                                view! {
+                                                    <div class="flex flex-col ">
+                                                        <Card label={label} checked=checked handler_on_click={|_|{}} />
+                                                        {
+                                                            checked.then(||{
+                                                                view!{
+                                                                    <p class="text-6xl text-center py-5">{"|"}</p>
+                                                                    <Card label=(scale_pattern.iter().position(|r|*r==i).unwrap()+1).to_string() checked={false} handler_on_click={|_|{}} />
+                                                                }
+                                                            })
+                                                        }
+                                                    </div>
+                                                }
                                             }
-                                        }
-                                    />
+                                        />
+                                    </div>
                                 </div>
                             }
                         })
