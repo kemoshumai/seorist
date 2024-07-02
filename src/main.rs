@@ -224,14 +224,19 @@ fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::Mous
 
 #[component]
 fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Synth>, note_numbers: Vec<u8> ) -> impl IntoView {
-    let handler_on_click = move |_|{
-        synthesizer.with_value(|synthesizer|{
+    let handler_on_mouse_down = move |_|{
+        synthesizer.update_value(|synthesizer|{
             synthesizer.play(&note_numbers.iter().map(|n|note_number_to_frequency(*n)).collect::<Vec<_>>());
+        });
+    };
+    let handler_on_mouse_up = move |_|{
+        synthesizer.update_value(|synthesizer|{
+            synthesizer.stop();
         });
     };
     view! {
         <div class="h-24 w-48 flex items-center p-2">
-            <button on:click=handler_on_click class="block w-full h-full text-center bg-white rounded-lg font-thin">
+            <button on:mousedown=handler_on_mouse_down on:mouseup=handler_on_mouse_up on:mouseout=handler_on_mouse_up class="block w-full h-full text-center bg-white rounded-lg font-thin">
                 <span class="text-4xl">{label}</span><br />
                 <span class="text-2xl">{caption}</span>
             </button>

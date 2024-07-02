@@ -1,8 +1,9 @@
-use web_sys::{AudioContext, GainNode};
+use web_sys::{AudioContext, GainNode, OscillatorNode};
 
 pub struct Synth{
     ctx: AudioContext,
     output_gain: GainNode,
+    oscillators: Vec<OscillatorNode>,
 }
 
 impl Synth{
@@ -17,10 +18,11 @@ impl Synth{
         Self{
             ctx,
             output_gain: gain,
+            oscillators: Vec::new(),
         }
     }
 
-    pub fn play(&self, frequencies: &[f32]){
+    pub fn play(&mut self, frequencies: &[f32]){
         
         for freq in frequencies {
             
@@ -29,10 +31,17 @@ impl Synth{
             osc.connect_with_audio_node(self.output_gain.as_ref()).unwrap();
 
             osc.frequency().set_target_at_time(*freq, self.ctx.current_time(), 0.01).unwrap();
-            osc.frequency().set_target_at_time(0., self.ctx.current_time()+1.0, 0.01).unwrap();
             osc.start().unwrap();
+
+            self.oscillators.push(osc);
 
         }
 
+    }
+
+    pub fn stop(&mut self){
+        for osc in self.oscillators.drain(..){
+            osc.stop().unwrap();
+        }
     }
 }
