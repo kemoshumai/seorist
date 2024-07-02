@@ -19,6 +19,8 @@ jobs:
       uses: actions/checkout@v4
     - name: Setup Trunk
       uses: jetli/trunk-action@v0.5.0
+    - name: Rustup Wasm32 Target
+      run: rustup target add wasm32-unknown-unknown
     - name: Build
       run: trunk build --release
     - uses: actions/upload-artifact@v3
