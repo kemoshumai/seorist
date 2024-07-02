@@ -82,7 +82,7 @@ fn App() -> impl IntoView {
                                     <span class={minor_span_class} on:click=move|_|set_scale.set(Scale::Minor) >minor</span>
                                 </p>
                                 <div class="overflow-x-scroll w-screen">
-                                    <div class="flex gap-2">
+                                    <div class="flex gap-2 justify-center">
                                         <For 
                                             each=||{0..12}
                                             key=|&i|{i}
