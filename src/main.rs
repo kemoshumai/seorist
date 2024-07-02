@@ -171,6 +171,24 @@ fn App() -> impl IntoView {
                                         synthesizer={synthesizer} 
                                         note_numbers_in_scale={note_numbers_in_scale.clone()}
                                     /> // 6th
+                                    <div class="flex flex-col">
+                                        <For
+                                            each=||{0..7}
+                                            key=|&i|{i}
+                                            children=move|i|{
+                                                let label = format!("{} aug", get_roman_number_musical(i+1));
+                                                let caption = format!("{}-{}-{}#", (i%7)+1, (i+2)%7 + 1, (i+4)%7 + 1);
+                                                let note_numbers: Vec<u8> = [
+                                                    *(note_numbers_in_scale.get((i%7) as usize).unwrap()),
+                                                    *(note_numbers_in_scale.get(((i+2)%7) as usize).unwrap()),
+                                                    note_numbers_in_scale.get(((i+4)%7) as usize).unwrap()+1,
+                                                ].to_vec();
+                                                view!{
+                                                    <ChordCard label={label} caption={caption} synthesizer=synthesizer note_numbers=note_numbers />
+                                                }
+                                            }
+                                        />
+                                    </div>// aug
                                 </div>
                             }.into_view()
                         },
