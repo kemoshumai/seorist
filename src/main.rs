@@ -2,7 +2,7 @@
 mod synth;
 
 use leptos::*;
-use web_sys::{window, HtmlDivElement};
+use web_sys::HtmlDivElement;
 fn main() {
     console_error_panic_hook::set_once();
     mount_to_body(|| view! { <App /> } );
@@ -112,7 +112,6 @@ fn App() -> impl IntoView {
                     let synthesizer = main_synth;
 
                     move || key_note_number.get().is_some().then(|| {
-                        let key_note_number = key_note_number.get().unwrap();
 
                         view!{
                             <h2>{"Chords"}</h2>
@@ -157,11 +156,9 @@ fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::Mous
 
 #[component]
 fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Synth> ) -> impl IntoView {
-    let label_clone = label.clone();
     let handler_on_click = move |_|{
-        let freq = 440.0 * 2.0_f32.powf((label_clone.chars().next().unwrap() as i32 - 60) as f32 / 12.0);
         synthesizer.with_value(|synthesizer|{
-            synthesizer.play(freq);
+            synthesizer.play(&[261.,329.,392.]);
         });
     };
     view! {
