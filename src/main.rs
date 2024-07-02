@@ -202,7 +202,7 @@ fn Card(label: String, checked: bool, handler_on_click: impl Fn(leptos::ev::Mous
 fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Synth>, note_numbers: Vec<u8> ) -> impl IntoView {
     let handler_on_click = move |_|{
         synthesizer.with_value(|synthesizer|{
-            synthesizer.play(&[261.,329.,392.]);
+            synthesizer.play(&note_numbers.iter().map(|n|note_number_to_frequency(*n)).collect::<Vec<_>>());
         });
     };
     view! {
@@ -235,6 +235,13 @@ fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: Stored
         </div>
     }
 }
+
+
+// MIDIノート番号から周波数を計算する
+fn note_number_to_frequency(note_number: u8) -> f32 {
+    440. * 2_f32.powf((note_number as f32 - 69.) / 12.)
+}
+
 
 fn get_note_name(key_number: u8) -> &'static str{
     match key_number%12 {
