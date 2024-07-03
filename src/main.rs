@@ -38,7 +38,7 @@ fn App() -> impl IntoView {
             <header class="overflow-none">
                 <p class="text-8xl p-5">{"Seorist"}</p>
                 <div class="overflow-x-scroll  py-3">
-                    <div class="flex gap-2 cursor-pointer" on:wheel=horizontal_scroll_handler>               
+                    <div class="flex gap-2 cursor-pointer" on:wheel=horizontal_scroll_handler>
                         <For 
                             each = move || {(0..=127-12).map(move|i|(i, key_note_number.get().is_some_and(|t|t==i) ))}
                             key = |&i|{i}
@@ -82,7 +82,7 @@ fn App() -> impl IntoView {
                                     <span class={minor_span_class} on:click=move|_|set_scale.set(Scale::Minor) >minor</span>
                                 </p>
                                 <div class="overflow-x-scroll w-screen">
-                                    <div class="flex gap-2 justify-center">
+                                    <div class="flex gap-2 justify-center w-min">
                                         <For 
                                             each=||{0..12}
                                             key=|&i|{i}
