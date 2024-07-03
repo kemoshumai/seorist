@@ -81,8 +81,8 @@ fn App() -> impl IntoView {
                                     <span>{"/"}</span>
                                     <span class={minor_span_class} on:click=move|_|set_scale.set(Scale::Minor) >minor</span>
                                 </p>
-                                <div class="overflow-x-scroll w-screen">
-                                    <div class="flex gap-2 justify-center w-min">
+                                <div class="m-w-screen w-screen overflow-x-scroll">
+                                    <div class="flex gap-2 w-min mx-auto">
                                         <For 
                                             each=||{0..12}
                                             key=|&i|{i}
@@ -91,7 +91,7 @@ fn App() -> impl IntoView {
                                                 let label = format!("{}{}", note_name, (key_note_number+i) as i8/12-1);
                                                 let checked = scale_pattern.contains(&(i%12));
                                                 view! {
-                                                    <div class="flex flex-col ">
+                                                    <div class="flex flex-col">
                                                         <Card label={label} checked=checked handler_on_click={|_|{}} />
                                                         {
                                                             checked.then(||{
