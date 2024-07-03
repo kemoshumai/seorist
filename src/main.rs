@@ -23,18 +23,6 @@ fn App() -> impl IntoView {
     let main_synth = store_value(synth::Synth::new());
     let key_scroll_area = create_node_ref();
 
-    let horizontal_scroll_handler = |event: leptos::ev::WheelEvent| {
-
-        // マウスパッドでの横スクロールを許容する
-        if event.delta_y().abs() < event.delta_x().abs() {
-            return;
-        }
-    
-        let target: HtmlDivElement = event_target(&event);
-        target.set_scroll_left(target.scroll_left() + event.delta_y() as i32);
-        
-    };
-
     create_effect(move |_| {
         if let Some(area) = key_scroll_area.get() {
             let area: HtmlElement<html::Div> = area;
@@ -48,7 +36,7 @@ fn App() -> impl IntoView {
             <header class="overflow-none">
                 <p class="text-8xl p-5">{"Seorist"}</p>
                 <div class="overflow-x-scroll  py-3" _ref=key_scroll_area >
-                    <div class="flex gap-2 cursor-pointer" on:wheel=horizontal_scroll_handler>
+                    <div class="flex gap-2 cursor-pointer">
                         <For 
                             each = move || {(0..=127-12).map(move|i|(i, key_note_number.get().is_some_and(|t|t==i) ))}
                             key = |&i|{i}
