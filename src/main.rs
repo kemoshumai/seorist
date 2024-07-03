@@ -2,6 +2,7 @@
 mod synth;
 
 use leptos::*;
+use logging::log;
 use web_sys::HtmlDivElement;
 fn main() {
     console_error_panic_hook::set_once();
@@ -20,6 +21,7 @@ fn App() -> impl IntoView {
     let (key_note_number, set_key_note_number) = create_signal(None);
     let (scale, set_scale) = create_signal(Scale::Major);
     let main_synth = store_value(synth::Synth::new());
+    let key_scroll_area = create_node_ref();
 
     let horizontal_scroll_handler = |event: leptos::ev::WheelEvent| {
 
@@ -33,11 +35,19 @@ fn App() -> impl IntoView {
         
     };
 
+    create_effect(move |_| {
+        if let Some(area) = key_scroll_area.get() {
+            let area: HtmlElement<html::Div> = area;
+            area.set_scroll_left( area.scroll_width() / 2 - 24 * 12 / 2 );
+        }
+        log!("timeout");
+    });
+
     view! {
         <div class="overflow-none w-screen max-w-screen flex flex-col min-h-screen">
             <header class="overflow-none">
                 <p class="text-8xl p-5">{"Seorist"}</p>
-                <div class="overflow-x-scroll  py-3">
+                <div class="overflow-x-scroll  py-3" _ref=key_scroll_area >
                     <div class="flex gap-2 cursor-pointer" on:wheel=horizontal_scroll_handler>
                         <For 
                             each = move || {(0..=127-12).map(move|i|(i, key_note_number.get().is_some_and(|t|t==i) ))}
