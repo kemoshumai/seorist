@@ -127,26 +127,28 @@ fn App() -> impl IntoView {
     
                             view!{
                                 <h2>{"Chords"}</h2>
-                                <div class="flex">
-                                    <div class="flex flex-col">
+                                <div class="flex flex-col">
+                                    <div class="flex">
                                         <For
                                             each=||{0..7}
                                             key=|&i|{i}
                                             children=move|i|{
                                                 view!{
-                                                    <div class="h-24 aspect-square flex items-center">
+                                                    <div class="h-24 w-48 aspect-square flex items-center">
                                                         <p class="text-center w-full text-6xl font-thin">{get_roman_number_musical(i+1)}</p>
                                                     </div>
                                                 }
                                             }
                                         />
                                     </div>
-                                    <ChordCardList 
-                                        differences=&[0, 2, 4] 
-                                        label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() 
-                                        synthesizer={synthesizer} 
-                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
-                                    /> // Major / Minor
+                                    <div class="flex">
+                                        <ChordCardList 
+                                            differences=&[0, 2, 4] 
+                                            label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() 
+                                            synthesizer={synthesizer} 
+                                            note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                        /> // Major / Minor
+                                    </div>
                                     <ChordCardList 
                                         differences=&[0, 2, 4, 6]  
                                         label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) 
@@ -177,7 +179,7 @@ fn App() -> impl IntoView {
                                         synthesizer={synthesizer} 
                                         note_numbers_in_scale={note_numbers_in_scale.clone()}
                                     /> // 6th
-                                    <div class="flex flex-col">
+                                    <div class="flex">
                                         <For
                                             each=||{0..7}
                                             key=|&i|{i}
@@ -247,7 +249,7 @@ fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Syn
 #[component]
 fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: StoredValue<synth::Synth>, note_numbers_in_scale: Vec<u8>) -> impl IntoView  where T: Fn(Vec<u8>) -> String + 'static{
     view! {
-        <div class="flex flex-col">
+        <div class="flex">
             <For
                 each=||{0..7}
                 key=|&i|{i}
