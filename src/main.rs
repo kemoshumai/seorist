@@ -127,76 +127,78 @@ fn App() -> impl IntoView {
     
                             view!{
                                 <h2>{"Chords"}</h2>
-                                <div class="flex flex-col">
-                                    <div class="flex">
-                                        <For
-                                            each=||{0..7}
-                                            key=|&i|{i}
-                                            children=move|i|{
-                                                view!{
-                                                    <div class="h-24 w-48 aspect-square flex items-center">
-                                                        <p class="text-center w-full text-6xl font-thin">{get_roman_number_musical(i+1)}</p>
-                                                    </div>
+                                <div class="w-screen overflow-x-scroll">
+                                    <div class="flex flex-col w-min mx-auto">
+                                        <div class="flex">
+                                            <For
+                                                each=||{0..7}
+                                                key=|&i|{i}
+                                                children=move|i|{
+                                                    view!{
+                                                        <div class="h-24 w-48 aspect-square flex items-center">
+                                                            <p class="text-center w-full text-6xl font-thin">{get_roman_number_musical(i+1)}</p>
+                                                        </div>
+                                                    }
                                                 }
-                                            }
-                                        />
-                                    </div>
-                                    <div class="flex">
+                                            />
+                                        </div>
+                                        <div class="flex">
+                                            <ChordCardList 
+                                                differences=&[0, 2, 4] 
+                                                label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() 
+                                                synthesizer={synthesizer} 
+                                                note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                            /> // Major / Minor
+                                        </div>
                                         <ChordCardList 
-                                            differences=&[0, 2, 4] 
-                                            label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() 
+                                            differences=&[0, 2, 4, 6]  
+                                            label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) 
                                             synthesizer={synthesizer} 
                                             note_numbers_in_scale={note_numbers_in_scale.clone()}
-                                        /> // Major / Minor
-                                    </div>
-                                    <ChordCardList 
-                                        differences=&[0, 2, 4, 6]  
-                                        label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) 
-                                        synthesizer={synthesizer} 
-                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
-                                    /> // 7th
-                                    <ChordCardList 
-                                        differences=&[0, 2, 4, 8]  
-                                        label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) 
-                                        synthesizer={synthesizer} 
-                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
-                                    /> // add9
-                                    <ChordCardList 
-                                        differences=&[0, 2, 4, 6, 8]  
-                                        label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) 
-                                        synthesizer={synthesizer} 
-                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
-                                    /> // 9th
-                                    <ChordCardList 
-                                        differences=&[0, 3, 4]  
-                                        label_fn=|d|format!("{} sus4", get_roman_number_musical(*d.first().unwrap())) 
-                                        synthesizer={synthesizer} 
-                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
-                                    /> // sus4
-                                    <ChordCardList 
-                                        differences=&[0, 2, 4, 5]  
-                                        label_fn=|d|format!("{} 6", get_roman_number_musical(*d.first().unwrap())) 
-                                        synthesizer={synthesizer} 
-                                        note_numbers_in_scale={note_numbers_in_scale.clone()}
-                                    /> // 6th
-                                    <div class="flex">
-                                        <For
-                                            each=||{0..7}
-                                            key=|&i|{i}
-                                            children=move|i|{
-                                                let label = format!("{} aug", get_roman_number_musical(i+1));
-                                                let caption = format!("{}-{}-{}#", (i%7)+1, (i+2)%7 + 1, (i+4)%7 + 1);
-                                                let note_numbers: Vec<u8> = [
-                                                    *(note_numbers_in_scale.get((i%7) as usize).unwrap()),
-                                                    *(note_numbers_in_scale.get(((i+2)%7) as usize).unwrap()),
-                                                    note_numbers_in_scale.get(((i+4)%7) as usize).unwrap()+1,
-                                                ].to_vec();
-                                                view!{
-                                                    <ChordCard label={label} caption={caption} synthesizer=synthesizer note_numbers=note_numbers />
+                                        /> // 7th
+                                        <ChordCardList 
+                                            differences=&[0, 2, 4, 8]  
+                                            label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) 
+                                            synthesizer={synthesizer} 
+                                            note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                        /> // add9
+                                        <ChordCardList 
+                                            differences=&[0, 2, 4, 6, 8]  
+                                            label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) 
+                                            synthesizer={synthesizer} 
+                                            note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                        /> // 9th
+                                        <ChordCardList 
+                                            differences=&[0, 3, 4]  
+                                            label_fn=|d|format!("{} sus4", get_roman_number_musical(*d.first().unwrap())) 
+                                            synthesizer={synthesizer} 
+                                            note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                        /> // sus4
+                                        <ChordCardList 
+                                            differences=&[0, 2, 4, 5]  
+                                            label_fn=|d|format!("{} 6", get_roman_number_musical(*d.first().unwrap())) 
+                                            synthesizer={synthesizer} 
+                                            note_numbers_in_scale={note_numbers_in_scale.clone()}
+                                        /> // 6th
+                                        <div class="flex">
+                                            <For
+                                                each=||{0..7}
+                                                key=|&i|{i}
+                                                children=move|i|{
+                                                    let label = format!("{} aug", get_roman_number_musical(i+1));
+                                                    let caption = format!("{}-{}-{}#", (i%7)+1, (i+2)%7 + 1, (i+4)%7 + 1);
+                                                    let note_numbers: Vec<u8> = [
+                                                        *(note_numbers_in_scale.get((i%7) as usize).unwrap()),
+                                                        *(note_numbers_in_scale.get(((i+2)%7) as usize).unwrap()),
+                                                        note_numbers_in_scale.get(((i+4)%7) as usize).unwrap()+1,
+                                                    ].to_vec();
+                                                    view!{
+                                                        <ChordCard label={label} caption={caption} synthesizer=synthesizer note_numbers=note_numbers />
+                                                    }
                                                 }
-                                            }
-                                        />
-                                    </div>// aug
+                                            />
+                                        </div>// aug
+                                    </div>
                                 </div>
                             }.into_view()
                         },
