@@ -1,6 +1,8 @@
 # Seorist
 
-Welcome to Seorist! This repository contains the source code for a Rust project focused on search engine optimization (SEO).
+Welcome to Seorist! 
+Seorist is a web application that allows you to play chords by simply pressing a button.
+We visually represent music theory in a graphical format to make it easy to understand.
 
 ## Build
 
