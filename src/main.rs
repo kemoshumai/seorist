@@ -144,38 +144,38 @@ fn App() -> impl IntoView {
                                             <div class="flex">
                                                 <ChordCardList 
                                                     differences=&[0, 2, 4] 
-                                                    label_fn=|d|get_roman_number_musical(*d.first().unwrap()).to_string() 
+                                                    label_fn=|d, is_minor|get_roman_number_musical(*d.first().unwrap()).to_string() + if is_minor {"m"} else {""}
                                                     synthesizer={synthesizer} 
                                                     note_numbers_in_scale={note_numbers_in_scale.clone()}
                                                 /> // Major / Minor
                                             </div>
                                             <ChordCardList 
                                                 differences=&[0, 2, 4, 6]  
-                                                label_fn=|d|format!("{} 7", get_roman_number_musical(*d.first().unwrap())) 
+                                                label_fn=|d, is_minor|format!("{}{} 7" ,get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // 7th
                                             <ChordCardList 
                                                 differences=&[0, 2, 4, 8]  
-                                                label_fn=|d|format!("{} add9", get_roman_number_musical(*d.first().unwrap())) 
+                                                label_fn=|d, is_minor|format!("{}{} add9" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // add9
                                             <ChordCardList 
                                                 differences=&[0, 2, 4, 6, 8]  
-                                                label_fn=|d|format!("{} 9", get_roman_number_musical(*d.first().unwrap())) 
+                                                label_fn=|d, is_minor|format!("{}{} 9" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // 9th
                                             <ChordCardList 
-                                                differences=&[0, 3, 4]  
-                                                label_fn=|d|format!("{} sus4", get_roman_number_musical(*d.first().unwrap())) 
+                                                differences=&[0, 3, 4] 
+                                                label_fn=|d, is_minor|format!("{}{} sus4" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // sus4
                                             <ChordCardList 
                                                 differences=&[0, 2, 4, 5]  
-                                                label_fn=|d|format!("{} 6", get_roman_number_musical(*d.first().unwrap())) 
+                                                label_fn=|d, is_minor|format!("{}{} 6" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // 6th
@@ -184,13 +184,22 @@ fn App() -> impl IntoView {
                                                     each=||{0..7}
                                                     key=|&i|{i}
                                                     children=move|i|{
-                                                        let label = format!("{} aug", get_roman_number_musical(i+1));
                                                         let caption = format!("{}-{}-{}#", (i%7)+1, (i+2)%7 + 1, (i+4)%7 + 1);
                                                         let note_numbers: Vec<u8> = [
                                                             *(note_numbers_in_scale.get((i%7) as usize).unwrap()),
                                                             *(note_numbers_in_scale.get(((i+2)%7) as usize).unwrap()),
                                                             note_numbers_in_scale.get(((i+4)%7) as usize).unwrap()+1,
+
                                                         ].to_vec();
+
+                                                        let mut second = note_numbers_in_scale[(i as usize + 2)%7] as i32;
+                                                        let first = note_numbers_in_scale[i as usize] as i32;
+                                                        if second < first {
+                                                            second += 12;
+                                                        }
+                                                        let is_minor = second - first == 3;
+                                                        let label = format!("{}{} aug", get_roman_number_musical(i+1), if is_minor {"m"} else {""});
+
                                                         view!{
                                                             <ChordCard label={label} caption={caption} synthesizer=synthesizer note_numbers=note_numbers />
                                                         }
@@ -256,7 +265,7 @@ fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Syn
 }
 
 #[component]
-fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: StoredValue<synth::Synth>, note_numbers_in_scale: Vec<u8>) -> impl IntoView  where T: Fn(Vec<u8>) -> String + 'static{
+fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: StoredValue<synth::Synth>, note_numbers_in_scale: Vec<u8>) -> impl IntoView  where T: Fn(Vec<u8>, bool) -> String + 'static{
     view! {
         <div class="flex">
             <For
@@ -265,8 +274,16 @@ fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: Stored
                 children=move|i|{
                     let numbers = differences.iter().map(|d| (i + d) % 7 + 1).collect::<Vec<_>>();
                     let caption = numbers.iter().map(|x|x.to_string()).collect::<Vec<_>>().join("-");
-                    let label = label_fn(numbers.clone());
                     let note_numbers = numbers.iter().map(|n|*note_numbers_in_scale.get(*n as usize - 1).unwrap()).collect::<Vec<_>>();
+
+                    let mut second = note_numbers_in_scale[(i as usize + 2)%7] as i32;
+                    let first = note_numbers_in_scale[i as usize] as i32;
+                    if second < first {
+                        second += 12;
+                    }
+                    let is_minor = second - first == 3;
+                    
+                    let label = label_fn(numbers.clone(), is_minor);
                     view!{
                         <ChordCard label={label} caption={caption} synthesizer=synthesizer note_numbers=note_numbers />
                     }
@@ -312,4 +329,15 @@ fn get_roman_number_musical(number: u8) -> &'static str{
         7 => "VII",
         _ => panic!("Invalid number"),
     }
+}
+
+// MIDI番号のVecをもとにマイナーか判定する関数
+fn get_is_minor(note_numbers: &[u8]) -> bool {
+    let mut note_numbers = note_numbers.to_vec();
+    for i in 1..note_numbers.len() {
+        if note_numbers[i] < note_numbers[0] {
+            note_numbers[i] += 12;
+        }
+    }
+    note_numbers[1] - note_numbers[0] == 3
 }
