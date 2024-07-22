@@ -330,14 +330,3 @@ fn get_roman_number_musical(number: u8) -> &'static str{
         _ => panic!("Invalid number"),
     }
 }
-
-// MIDI番号のVecをもとにマイナーか判定する関数
-fn get_is_minor(note_numbers: &[u8]) -> bool {
-    let mut note_numbers = note_numbers.to_vec();
-    for i in 1..note_numbers.len() {
-        if note_numbers[i] < note_numbers[0] {
-            note_numbers[i] += 12;
-        }
-    }
-    note_numbers[1] - note_numbers[0] == 3
-}
