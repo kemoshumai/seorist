@@ -144,38 +144,38 @@ fn App() -> impl IntoView {
                                             <div class="flex">
                                                 <ChordCardList 
                                                     differences=&[0, 2, 4] 
-                                                    label_fn=|d, is_minor|get_roman_number_musical(*d.first().unwrap()).to_string() + if is_minor {"m"} else {""}
+                                                    label_fn=|d, is_minor, is_flat_five|get_roman_number_musical(*d.first().unwrap()).to_string() + if is_minor {"m"} else {""} + if is_flat_five {"♭5"} else {""}
                                                     synthesizer={synthesizer} 
                                                     note_numbers_in_scale={note_numbers_in_scale.clone()}
                                                 /> // Major / Minor
                                             </div>
                                             <ChordCardList 
                                                 differences=&[0, 2, 4, 6]  
-                                                label_fn=|d, is_minor|format!("{}{} 7" ,get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
+                                                label_fn=|d, is_minor, is_flat_five|format!("{}{} 7" ,get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // 7th
                                             <ChordCardList 
                                                 differences=&[0, 2, 4, 8]  
-                                                label_fn=|d, is_minor|format!("{}{} add9" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
+                                                label_fn=|d, is_minor, is_flat_five|format!("{}{} add9" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // add9
                                             <ChordCardList 
                                                 differences=&[0, 2, 4, 6, 8]  
-                                                label_fn=|d, is_minor|format!("{}{} 9" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
+                                                label_fn=|d, is_minor, is_flat_five|format!("{}{} 9" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // 9th
                                             <ChordCardList 
                                                 differences=&[0, 3, 4] 
-                                                label_fn=|d, is_minor|format!("{}{} sus4" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
+                                                label_fn=|d, is_minor, is_flat_five|format!("{}{} sus4" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // sus4
                                             <ChordCardList 
                                                 differences=&[0, 2, 4, 5]  
-                                                label_fn=|d, is_minor|format!("{}{} 6" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
+                                                label_fn=|d, is_minor, is_flat_five|format!("{}{} 6" , get_roman_number_musical(*d.first().unwrap()), if is_minor {"m"} else {""}) 
                                                 synthesizer={synthesizer} 
                                                 note_numbers_in_scale={note_numbers_in_scale.clone()}
                                             /> // 6th
@@ -265,7 +265,7 @@ fn ChordCard(label: String, caption: String, synthesizer: StoredValue<synth::Syn
 }
 
 #[component]
-fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: StoredValue<synth::Synth>, note_numbers_in_scale: Vec<u8>) -> impl IntoView  where T: Fn(Vec<u8>, bool) -> String + 'static{
+fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: StoredValue<synth::Synth>, note_numbers_in_scale: Vec<u8>) -> impl IntoView  where T: Fn(Vec<u8>, bool, bool) -> String + 'static{
     view! {
         <div class="flex">
             <For
@@ -282,8 +282,9 @@ fn ChordCardList<T>(differences: &'static [u8], label_fn: T, synthesizer: Stored
                         second += 12;
                     }
                     let is_minor = second - first == 3;
+                    let is_flat_five = is_flat_five(&note_numbers);
                     
-                    let label = label_fn(numbers.clone(), is_minor);
+                    let label = label_fn(numbers.clone(), is_minor, is_flat_five);
                     view!{
                         <ChordCard label={label} caption={caption} synthesizer=synthesizer note_numbers=note_numbers />
                     }
@@ -329,4 +330,13 @@ fn get_roman_number_musical(number: u8) -> &'static str{
         7 => "VII",
         _ => panic!("Invalid number"),
     }
+}
+
+// ♭5かを判定する
+fn is_flat_five(note_numbers: &[u8]) -> bool {
+    let mut notes = note_numbers.to_vec();
+    if notes[1] < notes[0] {
+        notes[1] += 12;
+    }
+    notes[1] - notes[0] == 6
 }
